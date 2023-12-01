@@ -1,0 +1,30 @@
+include!("stdlib");
+
+fn to_digits(line, allow_words) -> {
+	ints := [];
+	for (ind,char) in line >> enumerate {
+		if char <= "9" and char >= "0" {
+			push(int(char), ints);
+		} if allow_words 
+			if line[ind:ind+3] == "one" { push(1, ints) }
+			else if line[ind:ind+3] == "two" { push(2, ints) }
+			else if line[ind:ind+5] == "three" { push(3, ints) }
+			else if line[ind:ind+4] == "four" { push(4, ints) }
+			else if line[ind:ind+4] == "five" { push(5, ints) }
+			else if line[ind:ind+3] == "six" { push(6, ints) }
+			else if line[ind:ind+5] == "seven" { push(7, ints) }
+			else if line[ind:ind+5] == "eight" { push(8, ints) }
+			else if line[ind:ind+4] == "nine" { push(9, ints) }
+	}
+	ints[0]*10 + ints[-1]
+}
+
+
+for part in [true, false]
+	read("1.input")
+		>> split("\n")
+		>> map(\>> to_digits(part)) 
+		>> sum
+		>> print;
+
+
