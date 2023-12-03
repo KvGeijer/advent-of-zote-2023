@@ -1,81 +1,47 @@
 include!("stdlib");
+include!("aoc.zote");
 
 input := read("input");
-split_in := input >> split("\n");
+lines := read("input") >> split("\n");
 
 char_dict := dict();
-for (row, line) in split_in >> enumerate for (col, char) in line >> enumerate {
-	char_dict[[row, col]] = char;
-}
+parse_matrix_dict(input, char_dict);
 
 gear_dict := dict();
-for (row, line) in split_in >> enumerate for (col, char) in line >> enumerate {
-	if char == "*" {
-		gear_dict[[row, col]] = [];
-	}
+for ((row, col), char) in char_dict if char == "*" {
+	gear_dict[[row, col]] = [];
 }
 
 fn is_surr(start, end, line_ind) -> {
-	for col in [start-1: end +2] for row in [line_ind-1, line_ind, line_ind +1] {
-		if row < len(split_in) and row >= 0 and col < len(split_in[0]) and col >= 0 {
-			d := split_in[row][col];
-			if d != "." and (d > "9" or d < "0") {
-				return true
-			}
+	for col in [start-1: end +2] for row in [line_ind-1, line_ind, line_ind +1] 
+		if [row, col] >> in(char_dict) {
+			d := char_dict[[row, col]];
+			if d != "." and !is_digit(d) return true;
 		}
-	}
 	false
-};
-
-sum = 0;
-for (line_ind,line) in split_in >> enumerate {
-	nbr := 0;
-	start := 0;
-	end := 0;
-	for (c_ind, char) in line >> enumerate {
-		if char <= "9" and char >= "0" {
-			if nbr == 0 start = c_ind;
-			end = c_ind;
-			nbr = 10*nbr + int(char);
-		} else {
-			for col in [start-1: end +2] for row in [line_ind-1, line_ind, line_ind +1] { 
-				if [row, col] >> in(gear_dict) {
-					nbr >> push(gear_dict[[row, col]]);
-				}
-			}
-			if nbr != 0 {
-				if is_surr(start, end, line_ind) {
-					sum += nbr;
-				}
-			}
-			start = 0;
-			end = 0;
-			nbr = 0;
-		}
-		
-	}
-
-	if nbr != 0 {
-		if is_surr(start, end, line_ind) {
-			sum += nbr;
-		}
-		for col in [start-1: end +2] for row in [line_ind-1, line_ind, line_ind +1] { 
-			if [row, col] >> in(gear_dict) {
-				nbr >> push(gear_dict[[row, col]]);
-			}
-		}
-	}
 }
 
-print(sum);
-sum = 0;
-for (k, val) in gear_dict {
-	if len(val) > 1 {
-		sum += prod(val);
-	} 
-	if len(val) > 2{
-		print("warning, ", val);
-	}
-}
+// [[val, row, col-start, col-end]]
+indexed_ints := input 
+	>> split("\n") 
+	>> map(indexed_ints)
+	>> enumerate
+	>> map(\(row, indexed) -> indexed >> map(\(val, start, end) -> [val, row, start, end]))
+	>> concat;
 
-print(sum)
+indexed_ints
+	>> map(\(val, row, col_start, col_end) -> if is_surr(col_start, col_end, row) val else 0)
+	>> sum
+	>> print;
+
+for (val, row, col_start, col_end) in indexed_ints 
+	for col in [col_start-1: col_end +2] for row in [row-1:row+2] 
+		if [row, col] >> in(gear_dict)
+			val >> push(gear_dict[[row, col]]);
+
+gear_dict
+	>> values
+	>> filter(\val -> len(val) > 1)
+	>> map(prod)
+	>> sum
+	>> print;

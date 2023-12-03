@@ -1,0 +1,69 @@
+// File with helper functions for advent of code
+
+/// Checks if a value is between two others (inclusive)
+fn in_range(val, from, to) -> from <= val and val <= to;
+
+/// Returns true if a char is between "0" and "9"
+///
+/// Will give strange results if now used on a string.
+/// Crashes if multiple chars
+fn is_digit(char) -> {
+	1 = len(char);
+	char >> in_range("0", "9")
+
+}
+
+/// Extracts all integers from a string
+fn ints(string) -> {
+	nbr := 0;
+	ints := [];
+	for char in string if char >> is_digit {
+		nbr = 10*nbr + int(char)
+	} else if nbr != 0 {
+		nbr >> push(ints);
+		nbr = 0;
+	}
+	
+	if nbr != 0 nbr >> push(ints);
+	
+
+	ints
+}
+
+/// Extracts all integers from a string, with their start and end indexes
+fn indexed_ints(string) -> {
+	(nbr, start, end) := [0, 0, 0];
+	ints := [];
+	for (ind, char) in string >> enumerate if char >> is_digit {
+		if nbr == 0 start = ind;
+		end = ind;
+
+		nbr = 10*nbr + int(char)
+	} else if nbr != 0 {
+		[nbr, start, end] >> push(ints);
+		nbr = 0;
+	}
+
+	if nbr != 0 [nbr, start, end] >> push(ints);
+	
+
+	ints
+}
+
+/// Stores al chars string into a dict such that dict[[x, y]] = split(string, "\n")[x][y]
+fn parse_matrix_dict(string, dict) -> {
+	// TODO: For this to be useful, we need default_dict
+	for (row, line) in string >> split("\n") >> enumerate
+		for (col, char) in line >> enumerate
+			dict[[row, col]] = char;
+}
+
+/// Flattens a list of lists to one list
+fn concat(coll) -> {
+	res := [];
+	for value in coll {
+		res = res ++ value;
+	}
+	res
+}
+
