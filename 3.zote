@@ -1,0 +1,81 @@
+include!("stdlib");
+
+input := read("input");
+split_in := input >> split("\n");
+
+char_dict := dict();
+for (row, line) in split_in >> enumerate for (col, char) in line >> enumerate {
+	char_dict[[row, col]] = char;
+}
+
+gear_dict := dict();
+for (row, line) in split_in >> enumerate for (col, char) in line >> enumerate {
+	if char == "*" {
+		gear_dict[[row, col]] = [];
+	}
+}
+
+fn is_surr(start, end, line_ind) -> {
+	for col in [start-1: end +2] for row in [line_ind-1, line_ind, line_ind +1] {
+		if row < len(split_in) and row >= 0 and col < len(split_in[0]) and col >= 0 {
+			d := split_in[row][col];
+			if d != "." and (d > "9" or d < "0") {
+				return true
+			}
+		}
+	}
+	false
+};
+
+sum = 0;
+for (line_ind,line) in split_in >> enumerate {
+	nbr := 0;
+	start := 0;
+	end := 0;
+	for (c_ind, char) in line >> enumerate {
+		if char <= "9" and char >= "0" {
+			if nbr == 0 start = c_ind;
+			end = c_ind;
+			nbr = 10*nbr + int(char);
+		} else {
+			for col in [start-1: end +2] for row in [line_ind-1, line_ind, line_ind +1] { 
+				if [row, col] >> in(gear_dict) {
+					nbr >> push(gear_dict[[row, col]]);
+				}
+			}
+			if nbr != 0 {
+				if is_surr(start, end, line_ind) {
+					sum += nbr;
+				}
+			}
+			start = 0;
+			end = 0;
+			nbr = 0;
+		}
+		
+	}
+
+	if nbr != 0 {
+		if is_surr(start, end, line_ind) {
+			sum += nbr;
+		}
+		for col in [start-1: end +2] for row in [line_ind-1, line_ind, line_ind +1] { 
+			if [row, col] >> in(gear_dict) {
+				nbr >> push(gear_dict[[row, col]]);
+			}
+		}
+	}
+}
+
+print(sum);
+sum = 0;
+for (k, val) in gear_dict {
+	if len(val) > 1 {
+		sum += prod(val);
+	} 
+	if len(val) > 2{
+		print("warning, ", val);
+	}
+}
+
+print(sum)
