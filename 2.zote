@@ -1,0 +1,45 @@
+include!("stdlib");
+
+fn at(coll, at) -> coll[at];
+
+fn draws(line) -> {
+	(game, sets) := line >> split(":");
+	game = game[5:] >> int;
+	sets = sets >> split(";");
+
+	rounds := [];
+	for set in sets {
+		color_count := [0, 0, 0];
+		
+		for draw in set >> split(",") {
+			(count, color) := draw >> split(" ");
+			ind := match color {
+				"red" -> 0,
+				"green" -> 1,
+				"blue" -> 2,
+			};
+			color_count[ind] += int(count);
+		}
+		color_count >> push(rounds);
+	}
+
+	[game, rounds]
+}
+
+read("input")
+	>> split("\n")
+	>> map(draws) 
+	>> \draws -> {
+		// Part 1
+		draws 
+			>> filter(\(_, rounds) -> rounds >> all(\>> enumerate >> all(\(enum, count) -> count - enum <= 12))) 
+			>> map(head) 
+			>> sum 
+			>> print;
+
+		// Part 2
+		draws 
+			>> map(\(_, rounds) -> [0,1,2] >> map(\ind -> rounds >> map(\>> at(ind)) >> maximum) >> prod) 
+			>> sum 
+			>> print;
+	};
