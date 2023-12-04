@@ -1,0 +1,36 @@
+include!("stdlib");
+include!("aoc.zote");
+
+lines := read("input")
+	>> split("\n");
+
+games := [[]];
+sum := 0;
+for game in lines {
+	(_, nbrs) := game >> split(": ");
+	(winning, yours) := nbrs >> split(" | ") >> map(\>> split(" ") >> map(int));
+	[1, winning, yours] >> push(games);
+
+	wins := yours >> filter(\>> in(winning)) >> len;
+	sum += if !wins 0 else 2^(wins - 1);
+}
+print(sum);
+
+count := len(games) -1;
+
+for ind in [1:len(games)]{
+	(nbr, winning, yours) := games[ind];
+	matches := 0;
+	for card in yours {
+		if card >> in(winning) {
+			matches += 1;
+		}
+	}
+
+	for win in [0:matches] {
+		games[ind+1+win][0] += nbr;
+		count += nbr;
+	}
+}
+print(count);
+
