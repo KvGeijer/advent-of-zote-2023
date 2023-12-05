@@ -1,0 +1,82 @@
+include!("stdlib");
+include!("aoc.zote");
+
+sections := read("input") >> split("\n\n");
+
+seeds := sections[0] >> [7:] >> split(" ") >> map(int);
+map_lists := sections[1:] >> map(\>> split("\n") >> [1:] >> map(\>> split(" ") >> map(int)));// >> map(\>> split("\n") >> map(ints));
+
+//----------- PART 1 ----------- //
+
+fn find_mapping(nbr, mapping) -> {
+	for (dest, origin, len) in mapping {
+		if nbr >> in_range(origin, origin + len - 1) {
+			return (dest - origin) + nbr;
+		}
+	}
+	nbr
+}
+
+locations := [];
+for nbr in seeds {
+	for section in map_lists {
+		nbr = find_mapping(nbr, section);
+	}
+	nbr >> push(locations)
+}
+locations >> minimum >> print;
+
+
+//----------- PART 2 ---------- //
+
+seed_ranges := seeds[0::2] >> zip(seeds[1::2]) >> map(\(from, len) -> [from, from + len -1]);
+
+fn find_overlap(from, to, section) -> {
+	lowest := nil;
+	lowest_stop := nil;
+	lowest_offset := nil;
+
+	for (dest, origin, len) in section {
+		if (from < origin + len) // from is within the range
+			and (to > origin)// to is not past the range
+		{
+			if lowest == nil or origin < lowest {
+				// Found a new best transform
+				lowest = max(from, origin);
+				lowest_stop = min(to, origin + len - 1);
+				lowest_offset = dest - origin;
+			}
+		}
+	} 
+
+	[lowest, lowest_stop, lowest_offset]	
+}
+
+// Transform a whole section of numbers
+for section in map_lists {
+	new_ranges := [];
+	for (from, to) in seed_ranges {
+		while from <= to {
+			(start, stop, offset) := find_overlap(from, to, section);
+
+			if start != nil {
+				// We have found an overlap
+				if start > from {
+					// Does not ovelap completely
+					[from + offset, start - 1 + offset] >> push(new_ranges);
+					from = start;
+				}
+
+				[start + offset, stop + offset] >> push(new_ranges);
+				from = stop + 1;
+			} else {
+				// Cannot find an overlap, just continue
+				[from, to] >> push(new_ranges);
+				break;
+			}
+		}
+	}
+	seed_ranges = new_ranges;
+}
+
+seed_ranges >> map(\>> [0]) >> minimum >> print;
