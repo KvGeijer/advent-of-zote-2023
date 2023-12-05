@@ -3,33 +3,8 @@ include!("aoc.zote");
 
 sections := read("input") >> split("\n\n");
 
-seeds := sections[0] >> [7:] >> split(" ") >> map(int);
-map_lists := sections[1:] >> map(\>> split("\n") >> [1:] >> map(\>> split(" ") >> map(int)));// >> map(\>> split("\n") >> map(ints));
-
-//----------- PART 1 ----------- //
-
-fn find_mapping(nbr, mapping) -> {
-	for (dest, origin, len) in mapping {
-		if nbr >> in_range(origin, origin + len - 1) {
-			return (dest - origin) + nbr;
-		}
-	}
-	nbr
-}
-
-locations := [];
-for nbr in seeds {
-	for section in map_lists {
-		nbr = find_mapping(nbr, section);
-	}
-	nbr >> push(locations)
-}
-locations >> minimum >> print;
-
-
-//----------- PART 2 ---------- //
-
-seed_ranges := seeds[0::2] >> zip(seeds[1::2]) >> map(\(from, len) -> [from, from + len -1]);
+seeds := sections[0] >> ints;
+maps := sections[1:] >> map(\>> split("\n") >> [1:] >> map(ints));
 
 fn find_overlap(from, to, section) -> {
 	lowest := nil;
@@ -52,31 +27,36 @@ fn find_overlap(from, to, section) -> {
 	[lowest, lowest_stop, lowest_offset]	
 }
 
-// Transform a whole section of numbers
-for section in map_lists {
-	new_ranges := [];
-	for (from, to) in seed_ranges {
-		while from <= to {
-			(start, stop, offset) := find_overlap(from, to, section);
+for ranges in [seeds >> zip(seeds),
+			   seeds[0::2] >> zip(seeds[1::2]) >> map(\(from, len) -> [from, from + len -1])] {
 
-			if start != nil {
-				// We have found an overlap
-				if start > from {
-					// Does not ovelap completely
-					[from + offset, start - 1 + offset] >> push(new_ranges);
-					from = start;
+	// Do one transform at a time to all ranges
+	for transform in maps {
+		new_ranges := [];
+		for (from, to) in ranges {
+			while from <= to {
+				(start, stop, offset) := find_overlap(from, to, transform);
+
+				if start != nil {
+					// We have found an overlap
+					if start > from {
+						// Does not ovelap completely
+						[from + offset, start - 1 + offset] >> push(new_ranges);
+						from = start;
+					}
+
+					[start + offset, stop + offset] >> push(new_ranges);
+					from = stop + 1;
+				} else {
+					// Cannot find an overlap, just continue
+					[from, to] >> push(new_ranges);
+					break;
 				}
-
-				[start + offset, stop + offset] >> push(new_ranges);
-				from = stop + 1;
-			} else {
-				// Cannot find an overlap, just continue
-				[from, to] >> push(new_ranges);
-				break;
 			}
 		}
+		ranges = new_ranges;
 	}
-	seed_ranges = new_ranges;
+
+	ranges >> map(\>> [0]) >> minimum >> print;
 }
 
-seed_ranges >> map(\>> [0]) >> minimum >> print;

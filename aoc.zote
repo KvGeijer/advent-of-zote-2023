@@ -15,21 +15,21 @@ fn is_digit(char) -> {
 
 /// Extracts all integers from a string
 fn ints(string) -> {
-	nbr := 0;
+	nbr := nil;
 	neg := false;
 	ints := [];
 	for char in string if char >> is_digit {
+		if nbr == nil nbr = 0;
 		nbr = 10*nbr + int(char)
-	} else if nbr != 0 {
+	} else if nbr != nil {
 		(if neg (-nbr) else nbr) >> push(ints);
-		nbr = 0;
+		nbr = nil;
 		neg = false;
 	} else {
 		neg = char == '-';
 	}
 	
-	if nbr != 0 nbr >> push(ints);
-	
+	if nbr != nil nbr >> push(ints);
 
 	ints
 }
