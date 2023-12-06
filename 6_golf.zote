@@ -1,0 +1,1 @@
+include!("stdlib");include!("aoc.zote");for m in[id,\>>filter(\>>neq(" "))]read("input")>>split("\n")>>map(\>>m>>ints)>>\(t,d)->zip(t,d)>>map(\(t,d)->[1:t]>>filter(\s->s*(t-s)>d)>>len)>>prod>>print

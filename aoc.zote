@@ -71,3 +71,15 @@ fn concat(coll) -> {
 	res
 }
 
+// Should probably move all these to stdlib
+add := \x, y -> x + y;
+sub := \x, y -> x - y;
+mul := \x, y -> x * y;
+div := \x, y -> x / y;
+
+eq :=  \x, y -> x == y;
+neq := \x, y -> x != y;
+gt :=  \x, y -> x > y;
+geq := \x, y -> x >= y;
+lt :=  \x, y -> x < y;
+leq := \x, y -> x <= y;
