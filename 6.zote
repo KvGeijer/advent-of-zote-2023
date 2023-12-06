@@ -1,0 +1,36 @@
+include!("stdlib");
+include!("aoc.zote");
+
+fn one_int(string) -> {
+	nbr := 0;
+	for char in string if char >> is_digit {
+		nbr = 10*nbr + int(char)
+	} 
+	nbr
+}
+
+fn ways((time, dist)) -> {
+	poss := 0;
+	for speed in [1:time] {
+		len := speed * (time-speed);
+		if len > dist {
+			poss += 1;
+		}
+	}
+	poss
+};
+
+read("input")
+	>> ints 
+	>> \ints -> zip(ints[:4], ints[4:])
+	>> map(ways)
+	>> prod
+	>> print;
+
+read("input")
+	>> split("\n") 
+	>> map(one_int)
+	>> ways
+	>> print;
+
+
