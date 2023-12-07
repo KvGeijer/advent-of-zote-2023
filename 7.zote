@@ -1,0 +1,82 @@
+include!("stdlib");
+include!("aoc.zote");
+
+input := read("input");
+
+fn to_card(char, part2) -> {
+	match char {
+		'A' -> 14,
+		'K' -> 13,
+		'Q' -> 12,
+		'J' -> if part2 (-1) else 11,
+		'T' -> 10,
+		char -> int(char),
+	}
+}
+
+fn power(hand) -> {
+	cd := dict();
+	for card in hand {
+		if !(card >> in(cd)) cd[card] = 1 else cd[card] += 1; 
+	}
+
+	joker := 0;
+	counts := [0, 0, 0, 0, 0, 0];
+	for (c, count) in cd {
+		if c == -1 joker = count
+		else counts[count] += 1;
+	}
+
+	found := [];
+	for (k, v) in counts >> enumerate {
+		if v {
+			
+		}
+	}
+	
+	if counts[5] or counts[4] and joker >= 1 or counts[3] and joker >= 2 or counts[2] and joker >= 3 or counts[1] and joker >= 4 or joker == 5 return 7
+	else if counts[4] or counts[3] and joker >= 1 or counts[2] and joker >= 2 or counts[1] and joker >= 3 or joker == 4 return 6
+
+	else if counts[3] and counts[2] return 5
+	else if counts[2] == 2 and joker >= 1 or counts[3] and joker >= 1 return 5
+	else if counts[2] == 1 and joker >= 3 return 5
+
+	else if counts[3] or counts[2] and joker >= 1 or counts[1] and joker >= 2 or joker == 3 return 4 // three kind
+	else if counts[2] == 2 or counts[2] and joker >= 1 or joker >= 2 return 3 // two pair
+	else if counts[2] or joker >= 1 return 2 // pair
+	else return 1;
+}
+
+fn rank(hand1, hand2) -> {
+	(p1, p2) := [power(hand1), power(hand2)];
+	if p1 > p2 
+		return 1
+	else if p2 > p1 {
+		return -1
+		
+	}
+	else {
+		for (c1, c2) in zip(hand1, hand2) {
+			if c1 > c2 
+				return 1
+			else if c2 > c1
+				return -1
+		}
+	}
+}
+
+for part2 in [false, true] {
+	hands := input >> split("\n") >> map(\>> split(" ") >> (\(k, v) -> [map(k, \>> to_card(part2)), v])) >> dict;
+	
+	hands_sorted := hands >> list >> sort(\(hand1, _), (hand2, _) -> rank(hand1, hand2)); 
+
+	sum := 0;
+	for (ind,(hand, bid)) in hands_sorted >> enumerate {
+		sum += int(bid)*(ind+1)
+	}
+	print(sum);
+}
+
+
+
+
