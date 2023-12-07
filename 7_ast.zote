@@ -17,7 +17,7 @@ fn power(hand) -> {
 		>> dict;
 
 	joker := if -1 >> in(cd) cd[-1] else 0;
-	counts := cd >> filter(\(k, v) -> k != -1) >> map(\>> [1]) >> sort;
+	counts := cd >> list >> filter(\(k, v) -> k != -1) >> map(\>> [1]) >> sort;
 
 	if joker == 5 or counts[-1] + joker == 5 6
 	else if counts[-1] + joker == 4 5
@@ -28,14 +28,26 @@ fn power(hand) -> {
 	else  0
 }
 
+fn rank(hand1, hand2) -> {
+	(p1, p2) := [power(hand1), power(hand2)];
+	if p1 > p2 
+		1
+	else if p2 > p1 
+		(-1) // TODO: Annoying that we need some encapsulation for -1, as it will otherwise bind as p1 - 1
+	else for (c1, c2) in zip(hand1, hand2) 
+		if c1 > c2 
+			return 1
+		else if c2 > c1
+			return -1
+}
+
 for part2 in [false, true] 
 	read("input")
 		>> split("\n") 
-		>> map(\>> split(" ") >> (\(card, bid) -> [map(card, \>> to_card(part2)), bid])) 
-		>> map(\(card, bid) -> [power(card), card, bid])
-		>> sort
+		>> map(\>> split(" ") >> (\(k, v) -> [map(k, \>> to_card(part2)), v])) 
+		>> sort(\(hand1, _), (hand2, _) -> rank(hand1, hand2)) 
 		>> enumerate 
-		>> map(\(ind, (_, _, bid)) -> int(bid)*(ind+1)) 
+		>> map(\(ind, (_, bid)) -> int(bid)*(ind+1)) 
 		>> sum 
 		>> print;
 
