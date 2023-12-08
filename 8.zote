@@ -1,0 +1,68 @@
+include!("stdlib");
+include!("aoc.zote");
+
+input := read("input");
+
+(steps, instr) := input >> split("\n\n");
+
+ins := [];
+way := dict();
+for line in instr >> split("\n") {
+	way[line[:3]] = [line[-9:-6], line[-4:-1]];
+}
+
+poss := [];
+for (node, _) in way {
+	if node[2] == 'A' node >> push(poss);
+}
+poss = poss >> sort;
+part1 := false; 
+
+repeats := [];
+
+for pos in poss {
+	inds := [];
+	ind := 0;
+	while true {
+		step := steps[ind % len(steps)];	
+
+		done := true;
+		match step {
+			'L' -> {
+				pos = way[pos][0];
+			}
+			'R' -> {
+				pos = way[pos][1];
+			}
+		}
+
+		ind += 1;
+
+		if pos[-1] == 'Z' {
+			if !part1 {
+				part1 = true;
+				print(ind);
+			}
+			ind >> push(inds);
+			if len(inds) > 5 {
+				inds >> push(repeats);
+				break;
+			}
+		}
+	}
+}
+
+reps := [];
+for inds in repeats {
+	for (i1, i2) in zip(inds[1:], inds) {
+		i1 - i2 >> push(reps);
+		break; // Added later since I saw that the pattern started immediately
+	}
+}
+
+// Used for maths to find answer
+// reps >> print;
+// firsts := repeats >> map(\>> [0]) >> print;
+
+// Found with online mats tools from reps.
+lcd := 17972669116327 >> print;

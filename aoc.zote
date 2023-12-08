@@ -83,3 +83,4 @@ gt :=  \x, y -> x > y;
 geq := \x, y -> x >= y;
 lt :=  \x, y -> x < y;
 leq := \x, y -> x <= y;
+not := \x -> !x;
