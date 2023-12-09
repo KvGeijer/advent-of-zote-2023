@@ -1,0 +1,24 @@
+include!("stdlib");
+include!("aoc.zote");
+
+fn ext(line, part2) -> {
+	diffs := zip(line, line[1:])
+		 >> map(\(x, y) -> y - x);
+
+	if all(diffs, \>> eq(0)) {
+		line[0]
+	} else {
+		below := ext(diffs, part2);
+		if part2 
+			line[0] - below
+		else
+			line[-1] + below
+	}
+}
+
+for part in [false, true]
+	read("input")
+		>> split("\n") 
+		>> map(\>> ints >> ext(part))
+		>> sum
+		>> print;
