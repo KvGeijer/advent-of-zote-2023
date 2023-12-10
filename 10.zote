@@ -1,0 +1,148 @@
+include!("stdlib");
+include!("aoc.zote");
+
+lines := read("input") >> split("\n");
+
+karta := dict();
+start := nil;
+
+for (row, line) in (lines >> enumerate) for (col, char) in line >> enumerate {
+	if char == 'S' {
+		start = [row, col];
+		print("WARNING: Setting start to hard-coded |");
+		line[col] = '|';
+	}
+}
+
+for (row, line) in (lines >> enumerate) for (col, char) in line >> enumerate {
+	key := [row, col];
+	match char {
+		'|' -> {
+			karta[key] = [[row-1, col], [row+1, col]];
+		}
+		'-' -> {
+			karta[key] = [[row, col-1], [row, col+1]];
+		}
+		'L' -> {
+			karta[key] = [[row, col+1], [row-1, col]];
+		}
+		'J' -> {
+			karta[key] = [[row, col-1], [row-1, col]];
+		}
+		'7' -> {
+			karta[key] = [[row+1, col], [row, col-1]];
+		}
+		'F' -> {
+			karta[key] = [[row, col+1], [row+1, col]];
+		}
+		'.' -> {
+			karta[key] = [];
+		}
+	}
+}
+
+(row, col) := start;
+(rf, cf) := [nil, nil]; 
+steps := 0;
+path := set();
+steplist := [];
+
+while true {
+	found := false;
+	for (r, c) in karta[[row, col]] {
+		if r != rf or c != cf {
+			rf = row;
+			cf = col;
+			row = r;
+			col = c;
+			found = true;
+			break;
+		}
+	}
+
+	[row, col] >> insert(path);
+	[row, col] >> push(steplist);
+	
+	steps += 1;
+	if [row, col] == start {
+		print(steps/2);
+		break;
+	}
+}
+
+right := [];
+left := [];
+
+for (from, to) in zip(steplist, steplist[1:] ++ [steplist[0]]) {
+	dir := vsub(to, from);
+
+	match dir {
+		(0, 1) -> {
+			to >> vadd([1, 0]) >> push(right);
+			to >> vadd([-1, 0]) >> push(left);
+			from >> vadd([1, 0]) >> push(right);
+			from >> vadd([-1, 0]) >> push(left);
+		}
+		(0, -1) -> {
+			to >> vadd([-1, 0]) >> push(right);
+			to >> vadd([1, 0]) >> push(left);
+			from >> vadd([-1, 0]) >> push(right);
+			from >> vadd([1, 0]) >> push(left);
+		}
+		(1, 0) -> {
+			to >> vadd([0, -1]) >> push(right);
+			to >> vadd([0, 1]) >> push(left);
+			from >> vadd([0, -1]) >> push(right);
+			from >> vadd([0, 1]) >> push(left);
+		}
+		(-1, 0) -> {
+			to >> vadd([0, 1]) >> push(right);
+			to >> vadd([0, -1]) >> push(left);
+			from >> vadd([0, 1]) >> push(right);
+			from >> vadd([0, -1]) >> push(left);
+		}
+	}
+}
+
+colors := dict();
+oob := dict();
+fn fill(start, color) -> {
+	// colors everything not in the loop
+	next := [start];
+	while next {
+		this := next;
+		next = [];
+
+		for pos in this {
+			if !in(pos, path) and !in(pos, colors) and in(pos, karta) {
+				colors[pos] = color;
+				for dir in [[1, 0], [-1, 0], [0, 1], [0, -1]] {
+					pos >> vadd(dir) >> push(next);
+				}
+			}
+			if !in(pos, karta) {
+				oob[color] = true;
+			}
+		}
+	}
+}
+
+
+for (starts, color) in [[left, "L"], [right, "R"]] {
+	for pos in starts fill(pos, color);
+	if color >> in(oob) >> not colors >> values >> filter(\>> eq(color)) >> len >> print;
+}
+
+// Debug print, which prints the whole map
+for row in [0:140]{
+	r := "";
+	for col in [0:140] {
+		key := [row, col];
+		if key >> in(path) "." >> push(r)
+		else if (key >> in(colors)) and colors[key] == 'L' "L" >> push(r)
+		else if (key >> in(colors)) and colors[key] == 'R' "R" >> push(r)
+		else "X" >> push(r);
+	}	
+	// r >> join("") >> print;
+} 
+
