@@ -5,48 +5,30 @@ input := read("input");
 
 lines := input >> split("\n");
 
-ecols := set();
-for col in [0:len(lines[0])] {
-	empty := true;
-	for row in [0:len(lines)] {
-		if lines[row][col] == "#" {
-			empty = false;
+srows := set();
+scols := set();
+for (row, line) in lines >> enumerate {
+	for (col, char) in line >> enumerate {
+		if char == "#" {
+			row >> insert(srows);
+			col >> insert(scols);
 		}
-	}
-	if empty {
-		col >> insert(ecols);
 	}
 }
 
-erows := set();
-for row in [0:len(lines)] {
-	empty := true;
-	for col in [0:len(lines[0])] {
-		if lines[row][col] == "#" {
-			empty = false;
-		}
-	}
-	if empty {
-		row >> insert(erows);
-	}
-}
-
-
-for skip_len in [2-1, 1000000-1] {
+for skip_len in [2, 1000000] >> map(\>> sub(1)) {
 	karta := set();
 
 	skipped_rows := 0;
-	for row in [0:len(lines)] {
+	for (row, line) in lines >> enumerate {
 		skipped_cols := 0;
-		if row >> in(erows) {
+		if row >> in(srows) >> not {
 			skipped_rows += skip_len;
 		} else {
-			for col in [0:len(lines[0])] {
-				if col >> in(ecols) {
+			for (col, char) in line >> enumerate {
+				if col >> in(scols) >> not {
 					skipped_cols += skip_len;
-				}
-
-				if lines[row][col] == "#" {
+				} else if char == "#" {
 					[row + skipped_rows, col+skipped_cols] >> insert(karta);
 				}
 			}
@@ -54,11 +36,7 @@ for skip_len in [2-1, 1000000-1] {
 	}
 	karta = karta >> keys;
 
-	karta >> map(\(x1, y1) -> 
-		karta >> map(\(x2, y2) -> 
-			abs(x1 - x2) + abs(y1 - y2)
-			) >> sum
-		) >> sum 
-		>> div(2) 
-		>> print;
+	dists := 0;
+	for (x1, y1) in karta for (x2, y2) in karta dists += abs(x1 - x2) + abs(y1 - y2);
+	dists/2 >> print;
 }
