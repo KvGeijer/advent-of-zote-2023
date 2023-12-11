@@ -1,0 +1,64 @@
+include!("stdlib");
+include!("aoc.zote");
+
+input := read("input");
+
+lines := input >> split("\n");
+
+ecols := set();
+for col in [0:len(lines[0])] {
+	empty := true;
+	for row in [0:len(lines)] {
+		if lines[row][col] == "#" {
+			empty = false;
+		}
+	}
+	if empty {
+		col >> insert(ecols);
+	}
+}
+
+erows := set();
+for row in [0:len(lines)] {
+	empty := true;
+	for col in [0:len(lines[0])] {
+		if lines[row][col] == "#" {
+			empty = false;
+		}
+	}
+	if empty {
+		row >> insert(erows);
+	}
+}
+
+
+for skip_len in [2-1, 1000000-1] {
+	karta := set();
+
+	skipped_rows := 0;
+	for row in [0:len(lines)] {
+		skipped_cols := 0;
+		if row >> in(erows) {
+			skipped_rows += skip_len;
+		} else {
+			for col in [0:len(lines[0])] {
+				if col >> in(ecols) {
+					skipped_cols += skip_len;
+				}
+
+				if lines[row][col] == "#" {
+					[row + skipped_rows, col+skipped_cols] >> insert(karta);
+				}
+			}
+		}
+	}
+	karta = karta >> keys;
+
+	karta >> map(\(x1, y1) -> 
+		karta >> map(\(x2, y2) -> 
+			abs(x1 - x2) + abs(y1 - y2)
+			) >> sum
+		) >> sum 
+		>> div(2) 
+		>> print;
+}
