@@ -1,8 +1,5 @@
 include!("stdlib");
 
-// This should/will be included in stdlib, so not counted
-fn at(coll, ind) -> coll[ind];
-
-for part in [false, true] read("1.input") >> split("\n") >>	map(\line -> [0, -1] >> map(\take_ind -> line >> enumerate >> map(\(ind, char) -> if char <= "9" and char > "0" int(char) else for (pattern, nbr) in ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine"] >> zip([1:10]) if part and line[ind:ind+len(pattern)] == pattern return nbr) >> filter(\x -> x != nil) >> at(take_ind)) >> \(first, second) -> first*10 + second) >> sum >> print
+for part in [false, true] read("1.input") >> split("\n") >>	map(\line -> [0, -1] >> map(\take_ind -> line >> enumerate >> map(\(ind, char) -> if char <= "9" and char > "0" int(char) else for (pattern, nbr) in ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine"] >> zip([1:10]) if part and line[ind:ind+len(pattern)] == pattern return nbr) >> filter(\x -> x != nil) >> [take_ind]) >> \(first, second) -> first*10 + second) >> sum >> print;
 
 
