@@ -1,0 +1,86 @@
+include!("stdlib");
+include!("aoc.zote");
+
+input := read("input");
+lines := input >> split("\n");
+
+cache := dict();
+
+fn arrangements(springs, groups) -> {
+	// dfs(springs, 1, groups, 0)
+	dfs(springs, 0, groups, 0)
+}
+
+fn dfs(springs, ss, groups, gs) -> {
+	key := [ss, gs];
+	if key >> in(cache) return cache[key];
+
+
+	if gs == len(groups) {
+		for spring in springs[ss:] {
+			if spring == "#" return cache[key] = 0;
+		}
+		return cache[key] =  1;
+	} else if ss >= len(springs) {
+		return cache[key] =  0;
+	} 
+
+	ways := 0;
+	
+	gsize := groups[gs];
+
+	while ss + gsize <= len(springs) {
+		// Cannot use this group
+		while any(springs[ss:ss+gsize], \>> eq('.')) {
+			if springs[ss] == "#" {
+				// We had to treat # as ok
+				return cache[key] =  ways;
+			}
+			ss += 1;
+		}
+
+		ss_stop := ss + gsize;
+
+		if ss_stop > len(springs) break;
+		if ss_stop == len(springs) or springs[ss_stop] != "#" {
+			ways += dfs(springs, ss_stop+1, groups, gs+1); 
+		}
+		
+		if springs[ss] == "#" {
+			// We had to treat # as ok
+			return cache[key] =  ways;
+		}
+		ss += 1;
+	}
+
+	cache[key] = ways
+}
+
+// Part 1
+{
+	tot := 0;
+	for line in lines {
+		(springs, groups) := line >> split(" ");
+		groups = groups >> split(",") >> map(int);
+
+		cache = dict();
+		tot += arrangements(springs, groups);
+	}
+	print(tot);
+}
+
+// Part 2
+{
+	tot := 0;
+	for line in lines {
+		(springs, groups) := line >> split(" ");
+		springs = springs ++ "?" ++ springs ++ "?" ++ springs ++ "?" ++ springs ++ "?" ++ springs;
+		groups = groups ++ "," ++ groups ++ "," ++ groups ++ "," ++ groups ++ "," ++ groups;
+		groups = groups >> split(",") >> map(int);
+
+		cache = dict();
+		tot += arrangements(springs, groups); 
+	}
+	print(tot);
+}
+
