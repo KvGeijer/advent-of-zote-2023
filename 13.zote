@@ -1,0 +1,124 @@
+include!("stdlib");
+include!("aoc.zote");
+
+input := read("input");
+patterns := input >> split("\n\n");
+
+fn solve(pattern, cf, normal) -> {
+	// Check if any col is mirror
+	ncols := len(pattern[0]);
+	nrows := len(pattern);
+	found := false;
+
+	// Rows: list for each row, with all indexes of #
+	rows := [];
+	cols := [];
+
+	for _ in [0:ncols] {
+		[] >> push(cols);
+	}
+
+	for (row, line) in pattern >> enumerate {
+		rowlist := [];
+		for (col, char) in line >> enumerate {
+			if char == '#' {
+				col >> push(rowlist);
+				row >> push(cols[col]);
+			}
+		}
+		rowlist >> push(rows);
+	}
+
+	for col in [1:ncols] {
+		if cf == 0 and normal == col continue;
+	
+		// Is is mirrored so that col - 1 == col
+		rc := col;
+		lc := col -1;
+
+		wrong := false;		
+		while rc < ncols and lc >= 0 {
+			if cols[lc] != cols[rc]  {
+				wrong = true;
+				break;
+			}
+
+			rc += 1;
+			lc -= 1;	
+		}
+
+		if !wrong {
+			// print("found col: ", col);
+			// print("For pattern\n", pattern >> join("\n"));
+			return [0, col];
+			found = true;
+			break;
+		}
+	}
+
+
+	if !found for row in [1:nrows] {
+		if cf == 1 and normal == row*100 continue;
+		// Is is mirrored so that row - 1 == row
+		rr := row;
+		lr := row -1;
+
+		wrong := false;		
+		while rr < nrows and lr >= 0 {
+			if rows[lr] != rows[rr] {
+				wrong = true;
+				break;
+			}
+
+			rr += 1;
+			lr -= 1;	
+		}
+
+		if !wrong {
+			// print("found rw: ", row);
+			found = true;
+			return [1, row*100];
+		}
+	}
+	[2, 0]
+}
+
+
+tot := 0;
+tot2 := 0;
+for (pi, pattern) in patterns >> enumerate {
+	pattern = pattern >> split("\n");
+
+	(cf, normal) := solve(pattern, nil, nil);
+	tot += normal;
+	
+	// print("on pattern, ", pi, " found normal ", normal, " ", cf);
+	found := false;
+	for (row, line) in pattern >> enumerate  {
+		for (col, char) in line >> enumerate  {
+			pattern[row][col] = if char == "#" "." else "#";
+
+			(mcf, mod) := solve(pattern, cf, normal);
+			// if [row, col] == [0, 0] {
+			// 	print("00:", mcf, " ", mod);
+			// 	print(pattern >> join("\n"));
+			// }
+			if mod != 0 {
+				found = true;
+				tot2 += mod;
+				// print("Found mod pattern ", mod, " for pi ", pi);
+			}
+
+
+			pattern[row][col] = char;
+			if found break;
+		}
+		if found break;
+	}
+	if !found {
+		print("NOT FOUND ", pi, "normal");
+	}
+}
+
+print(tot);
+print(tot2);
