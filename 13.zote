@@ -19,11 +19,11 @@ fn solve(pattern, normal_points) -> {
 	}
 
 	for col in [1:ncols] if normal_points != col 
-		if zip(cols[:col] >> rev, cols[col:]) >> all(\(l, r) -> l == r) 
+		if zip(cols[col-1::-1], cols[col:]) >> all(\(l, r) -> l == r) 
 			return col;
 
 	for row in [1:nrows] if normal_points != row*100 
-		if zip(rows[:row] >> rev, rows[row:]) >> all(\(l, r) -> l == r) 
+		if zip(rows[row-1::-1], rows[row:]) >> all(\(l, r) -> l == r) 
 			return row*100;
 }
 
