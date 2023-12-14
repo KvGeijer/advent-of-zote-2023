@@ -73,3 +73,16 @@ fn concat(coll) -> {
 
 vsub := \(r1, c1), (r2, c2) -> [r1 - r2, c1 - c2];
 vadd := \(r1, c1), (r2, c2) -> [r1 + r2, c1 + c2];
+
+/// Computes 4 neighbors of a 2d coordinate
+fn neighs4((x, y)) -> [[x+1, y], [x-1, y], [x, y+1], [x, y-1]];
+
+/// Computes 5 neighbors of a 2d coordinate
+fn neighs5((x, y)) -> [[x+1, y], [x-1, y], [x, y+1], [x, y-1], [x, y]];
+
+/// Computes 8 neighbors of a 2d coordinate
+fn neighs8((x, y)) -> [[x+1, y], [x-1, y], [x, y+1], [x, y-1], [x+1, y+1], [x+1, y-1], [x-1, y+1], [x-1, y-1]];
+
+/// Computes 9 neighbors of a 2d coordinate
+fn neighs9((x, y)) -> [[x+1, y], [x-1, y], [x, y+1], [x, y-1], [x+1, y+1], [x+1, y-1], [x-1, y+1], [x-1, y-1], [x, y]];
+
