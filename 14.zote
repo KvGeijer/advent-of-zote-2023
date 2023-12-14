@@ -1,0 +1,134 @@
+include!("stdlib");
+include!("aoc.zote");
+
+input := read("input");
+lines := input >> split("\n");
+
+cubes := set();
+rocks := set();
+
+rows := len(lines);
+cols := len(lines[0]);
+
+for (row, line) in lines >> enumerate for (col, char) in line >> enumerate {
+	if char == '#' {
+		[row, col] >> insert(cubes);
+	} else if char == 'O' {
+		[row, col] >> insert(rocks);
+	}
+}
+
+// Four almost identical functions for moving. Could be one, but don't know the performance penalty for the extra if, and I wanted speed
+fn move_up() -> {
+	next := set();
+	move := false;
+	for (i, rock) in rocks >> keys >>  enumerate {
+		(row, col) := rock;
+
+		if row != 0 {
+			up := [row - 1, col];
+			if !(up >> in(cubes)) and !(up >> in(rocks)) {
+				up >> insert(next);
+				move = true;
+			} else {
+				rock >> insert(next);
+			}
+		} else {
+			rock >> insert(next);
+		}
+	}
+	rocks = next;
+	move
+}
+
+fn move_left() -> {
+	next := set();
+	move := false;
+	for (i, rock) in rocks >> keys >>  enumerate {
+		(row, col) := rock;
+
+		if col != 0 {
+			left := [row, col-1];
+			if !(left >> in(cubes)) and !(left >> in(rocks)) {
+				left >> insert(next);
+				move = true;
+			} else {
+				rock >> insert(next);
+			}
+		} else {
+			rock >> insert(next);
+		}
+	}
+	rocks = next;
+	move
+}
+
+fn move_down() -> {
+	next := set();
+	move := false;
+	for (i, rock) in rocks >> keys >>  enumerate {
+		(row, col) := rock;
+
+		if row != rows-1 {
+			down := [row + 1, col];
+			if !(down >> in(cubes)) and !(down >> in(rocks)) {
+				down >> insert(next);
+				move = true;
+			} else {
+				rock >> insert(next);
+			}
+		} else {
+			rock >> insert(next);
+		}
+	}
+	rocks = next;
+	move
+}
+
+fn move_right() -> {
+	next := set();
+	move := false;
+	for (i, rock) in rocks >> keys >>  enumerate {
+		(row, col) := rock;
+
+		if col != cols-1 {
+			right := [row, col+1];
+			if !(right >> in(cubes)) and !(right >> in(rocks)) {
+				right >> insert(next);
+				move = true;
+			} else {
+				rock >> insert(next);
+			}
+		} else {
+			rock >> insert(next);
+		}
+	}
+	rocks = next;
+	move
+}
+
+fn load() -> rocks >> keys >> map(\>> [0] >> sub(rows) >> neg) >> sum;
+
+start := 0;
+pattern := [];
+for i in [0:1000] {
+	while move_up() {};
+	if i == 0 print(load());
+	while move_left() {};
+	while move_down() {};
+	while move_right() {};
+
+	load() >> push(pattern);
+
+	// Try to find a pattern (of sufficient length) repeating twice.
+	if i%2 == 1 and i > 100 for l in [25:i/2] {
+		if pattern[-l:] == pattern[-2*l:-l] {
+			// Extrapolate the answer from the pattern repeating to infinity
+			free := (1000000000 - i - 2) % l;
+			print(pattern[-l:][free]);
+			return
+		}
+	}
+}
+
+
