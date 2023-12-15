@@ -1,0 +1,46 @@
+include!("stdlib");
+include!("aoc.zote");
+
+input := read("input");
+line := input >> split("\n") >> [0];
+
+fn hash(str) -> {
+	res := 0;
+
+	for char in str {
+		res += to_ascii(char);
+		res *= 17;
+		res = res % 256;
+	}
+	res
+}
+
+line >> split(",") >> map(hash) >> sum >> print;
+
+boxes := [0:256] >> map(\>> const([]));
+
+fn take_step(step) -> {
+	if step[-1] != '-' {
+		(name, foc) := step >> split("=");
+		h := hash(name);
+		box := boxes[h];
+		for (i, len) in box >> enumerate if len[0] == name {
+			len[1] = int(foc);
+			return;
+		}
+		[name, int(foc)] >> push(box);
+	} else {
+		name := step[:-1];
+		h := hash(name);
+		boxes[h] = boxes[h] >> filter(\len -> len[0] != name);
+	}
+	
+}
+
+for step in line >> split(",") take_step(step);
+
+res := 0;
+for (boxi, box) in boxes >> enumerate for (i, (name, foc)) in box >> enumerate 
+		res += (i+1)*foc*(boxi+1);
+
+print(res);
