@@ -86,3 +86,13 @@ fn neighs8((x, y)) -> [[x+1, y], [x-1, y], [x, y+1], [x, y-1], [x+1, y+1], [x+1,
 /// Computes 9 neighbors of a 2d coordinate
 fn neighs9((x, y)) -> [[x+1, y], [x-1, y], [x, y+1], [x, y-1], [x+1, y+1], [x+1, y-1], [x-1, y+1], [x-1, y-1], [x, y]];
 
+/// Counts the occurrence of every item in an iterable
+fn count(items) -> {
+	counter := dict();
+	for item in items {
+		if !in(item, counter) counter[item] = 1
+		else counter[item] += 1;
+	}
+	counter
+}
+
