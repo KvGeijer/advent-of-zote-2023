@@ -1,0 +1,81 @@
+include!("stdlib");
+include!("aoc.zote");
+
+lines := read("input") >> split("\n");
+
+fn test(start, dir) -> {
+	visited := set();
+	vis_dir := set();
+
+	fn dfs((row, col), dir) -> {
+		if row >= len(lines) or row < 0 return;
+		if col >= len(lines[0]) or col < 0 return;
+		if [row, col, dir] >> in(vis_dir) return;
+		[row, col] >> insert(visited);
+		[row, col, dir] >> insert(vis_dir);
+
+		match lines[row][col] {
+			'.' -> {
+				dfs([row, col] >> vadd(dir), dir);
+			}
+			'/' -> {
+				dir = match dir {
+					(1, 0) -> [0,-1],
+					(-1, 0) -> [0,1],
+					(0, 1) -> [-1,0],
+					(0, -1) -> [1,0],
+				}; 
+				dfs([row, col] >> vadd(dir), dir);
+			}
+			'\' -> {
+				dir = match dir {
+					(1, 0) -> [0,1],
+					(-1, 0) -> [0,-1],
+					(0, 1) -> [1,0],
+					(0, -1) -> [-1,0],
+				}; 
+				dfs([row, col] >> vadd(dir), dir);
+			}
+			'|' -> {
+				if dir == [0, 1] or dir == [0, -1] {
+					d1 := [1, 0];
+					d2 := [-1, 0];
+					dfs([row, col] >> vadd(d1), d1);
+					dfs([row, col] >> vadd(d2), d2);
+				} else {
+					dfs([row, col] >> vadd(dir), dir);
+				}
+			}
+			'-' -> {
+				if dir == [1, 0] or dir == [-1, 0] {
+					d1 := [0, 1];
+					d2 := [0, -1];
+					dfs([row, col] >> vadd(d1), d1);
+					dfs([row, col] >> vadd(d2), d2);
+				} else {
+					dfs([row, col] >> vadd(dir), dir);
+				}
+			}
+		}
+	}
+
+	dfs(start, dir);
+
+	len(visited)
+}
+
+test([0, 0], [0, 1]) >> print;
+
+en := [];
+
+for col in [0:len(lines[0])] {
+	test([0, col], [0, 1]) >> push(en);
+	test([len(lines)-1, col], [0, -1]) >> push(en);
+}
+
+for row in [0:len(lines)] {
+	test([row, 0], [0, 1]) >> push(en);
+	test([row, len(lines[0])-1], [0, -1]) >> push(en);
+}
+
+en >> maximum >> print;
