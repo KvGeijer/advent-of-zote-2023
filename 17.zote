@@ -1,0 +1,49 @@
+include!("stdlib");
+include!("aoc.zote");
+
+input := read("input") >> trim;
+lines := input >> split("\n");
+karta := lines >> map(\>> map(int));
+
+rows := len(karta);
+cols := len(karta[0]);
+
+dirs := [[0,1], [0,-1], [1, 0], [-1,0]];
+
+prioq := priority_queue();
+[[0, 0], [-1, 0]] >> push_pq(0, prioq);
+visited := set();
+
+while true {
+	(loss, pos_dir) := prioq >> pop;
+
+	if pos_dir >> in(visited) continue;
+	pos_dir >> insert(visited);
+	(pos, ldir) := pos_dir;
+
+	if pos == [rows-1, cols - 1] {
+		print("Done 2");
+		print(-loss);
+		break;
+	}
+	
+	pdirs := dirs >> filter(\>> neq(ldir));
+
+	for dir in pdirs if dir[1] != -ldir[1] {
+		npos := pos;
+		nloss := loss;
+		for step in [1:11] {
+			npos = npos >> vadd(dir);
+
+			// out of bounds?
+			if npos[0] >= rows or npos[0] < 0 or npos[1] >= cols or npos[1] < 0 break;
+
+			nloss -= karta[npos[0]][npos[1]];
+
+			if step >= 4
+				[npos >> clone, dir] >> push_pq(nloss, prioq);
+		}
+	}
+	
+}
+
