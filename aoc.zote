@@ -96,3 +96,35 @@ fn count(items) -> {
 	counter
 }
 
+
+/// Parse a hex-string as an integer
+fn parse_hex(str) -> {
+	s := 0;
+	for c in str {
+		s = 16*s + if is_digit(c) int(c)
+		else to_ascii(c) - to_ascii("a") + 10;
+	};
+	s
+}
+
+/// Shoelace to find area within polygon
+///
+/// It counts all edges as fully filled, so adds edges/2 + 1 to area in polygon
+fn shoelace_grid(coords, edges) -> {
+	n := len(coords);
+	area := 0;
+	for i in [0:n] {
+		j := (i + 1) % n;
+		area += coords[i][0] * coords[j][1];
+		area -= coords[j][0] * coords[i][1];
+	}
+	// This is the area within the polygon
+	within := abs(area)/2;
+
+	// Here we add things to also count the edge cells as their whole.
+	// On average every edge cell will be 1/2 full, as we have a loop.
+	// Except that we will make one full revolution, so we add a 1, as we will have 4 cells 1/4 filled
+	within + edges/2 + 1
+}
+
+

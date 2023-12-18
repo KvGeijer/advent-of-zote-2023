@@ -1,0 +1,23 @@
+include!("stdlib");
+include!("aoc.zote");
+
+lines := read("input") >> trim >> split("\n") >> map(\>> split(' '));
+
+for parse in [
+	\(dir, len, _) -> [match dir {'R' -> 0, 'D' -> 1, 'L' -> 2, 'U' -> 3,}, int(len)],
+	\(_, _, hx) -> [int(hx[-2]), parse_hex(hx[2:-2])],
+] {
+	pos := [0, 0];
+	coords := [];
+	dug := 0;
+
+	for (dir, l) in lines >> map(parse) {
+		dug += l;
+		pos[(dir+1)%2] += l*((dir<=1)*2 - 1);
+		pos >> clone >> push(coords);
+	}
+
+	shoelace_grid(coords, dug) >> print;
+}
+
+
