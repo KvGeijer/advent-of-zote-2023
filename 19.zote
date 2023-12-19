@@ -4,6 +4,7 @@ include!("aoc.zote");
 input := read("input") >> trim;
 (rules, parts) := input >> split('\n\n') >> map(\>> split("\n"));
 
+// Parse the input
 rdict := dict();
 for rule in rules {
 	(name, rest) := rule >> split('{');
@@ -13,112 +14,48 @@ for rule in rules {
 	paths := [];
 	for part in parts[:-1] {
 		(r, to) := part >> split(':');
-		[part[0], part[1], int(r[2:]), to] >> push(paths);
+		[part[0], if part[1] == '>' gt else lt, int(r[2:]), to] >> push(paths);
 	}
 
 	rdict[name] = [paths, parts[-1]];
 }
 
-e := dict();
-e['x'] = [];
-e['m'] = [];
-e['a'] = [];
-e['s'] = [];
+// Part 1
+fn valid(part, wf) -> {
+	if wf == "A" return sum(part >> values) else if wf == "R" return 0;
 
-sol := 0;
-rs := 0;
-fn proc(poss, wf) -> {
-	// print("proc ", wf);
-	if wf == "A" {
-		here := poss >> values >> map(len) >> prod;
-		return here;
+	(paths, def) := rdict[wf];
 
-		// sets := 'xmas' >> map(\c -> poss[c] >> set);
-		// false_overlap := 0;
-		// for other in double {
-		// 	os := 1;
-		// 	inters := dict();
-		// 	for (i, c) in 'xmas' >> enumerate {
-		// 		os *= intersect(sets[i], other[c] >> set) >> len;
-		// 	}
-		// 	false_overlap += os;
-		// }
+	for (t, op, cmp, to) in paths {
+		if part[t] >> op(cmp) return valid(part, to);
+	}
+	valid(part, def)
+}
 
-		// overlap := 0;
-		// for other in sols {
-		// 	os := 1;
-		// 	inters := dict();
-		// 	for (i, c) in 'xmas' >> enumerate() {
-		// 		inter := intersect(sets[i], other[c] >> set);
-		// 		inters[c] = inter;
-		// 		os *= inter >> len;
-		// 	}
-		// 	inters >> push(double);
-		// 	overlap += os;
-		// }
-		// poss >> push(sols);
-		// print("SOLUTION: ", sol+=1, '/568, with here/overlap/false_overlaps: ', here, '/', overlap, '/', false_overlap);
-		
-		// return here - overlap + false_overlap;
-	} else if wf == "R" return 0;
-	// print("IN: ", poss);
-	// print('\n\n\n');
+parts 
+	>> map(\>> ints >> zip('xmas') >> map(rev) >> dict >> valid('in')) 
+	>> sum 
+	>> print;
 
-	
+// Part 2
+fn possibilities(poss, wf) -> {
+	if wf == "A" return poss >> values >> map(len) >> prod else if wf == "R" return 0;
 
 	tot := 0;
 	(paths, def) := rdict[wf];
 
-	diffs := [];
-	rets := 0;
 	for (t, op, cmp, to) in paths {
-		match op {
-			'>' -> if poss[t][-1] > cmp {
-				p2 := poss >> clone;
-				p2[t] = p2[t] >> filter(\>> gt(cmp));
-				poss[t] = poss[t] >> filter(\>> leq(cmp));
-				// proc(p2, to) >> push(diffs);
-				rets += proc(p2, to);
-			},
-			'<' -> if poss[t][0] < cmp {
-				p2 := poss >> clone;
-				p2[t] = p2[t] >> filter(\>> lt(cmp));
-				poss[t] = poss[t] >> filter(\>> geq(cmp));
-				// proc(p2, to) >> push(diffs);
-				rets += proc(p2, to);
-			},
-		}
+		p2 := poss >> clone;
+		p2[t] = p2[t] >> filter(\>> op(cmp));
+		poss[t] = poss[t] >> filter(\>> op(cmp) >> not);
+		tot += possibilities(p2, to);
 	}
 	
-	rets += proc(poss, def);
-	// proc(poss, def) >> push(diffs);
-	return rets
-
-	//diffs contain all possible dicts
-	// tdict := dict();
-	// for k in 'xmas' {
-	// 	all := set();
-	// 	for p in diffs for n in p[k] {
-	// 		n >> insert(all);
-	// 	}
-	// 	tdict[k] = all >> keys >> sort;
-	// }
-
-	// // print("Returning ", tdict);
-	// print('\n\n\n\n\n');
-	// tdict
-	
+	tot + possibilities(poss, def)
 }
 
-// Every rule split the input range in two for one of the values.
-// So keep track of all values with which we can reach every place? Or start from all endings? and work backwards?
-// 558 rules, on average split in 3 for each path. Average path length of a 
-poss := dict();
-poss['x'] = [1:4001];
-poss['m'] = [1:4001];
-poss['a'] = [1:4001];
-poss['s'] = [1:4001];
-
-print("Done!");
-proc(poss, 'in') >> print;
-// print(sols);
+'xmas' 
+	>> map(\c -> [c, [1:4001]]) 
+	>> dict 
+	>> possibilities('in') 
+	>> print;
