@@ -1,0 +1,124 @@
+include!("stdlib");
+include!("aoc.zote");
+
+input := read("input") >> trim;
+(rules, parts) := input >> split('\n\n') >> map(\>> split("\n"));
+
+rdict := dict();
+for rule in rules {
+	(name, rest) := rule >> split('{');
+	rest := rest[:-1];
+	parts := rest >> split(",");
+
+	paths := [];
+	for part in parts[:-1] {
+		(r, to) := part >> split(':');
+		[part[0], part[1], int(r[2:]), to] >> push(paths);
+	}
+
+	rdict[name] = [paths, parts[-1]];
+}
+
+e := dict();
+e['x'] = [];
+e['m'] = [];
+e['a'] = [];
+e['s'] = [];
+
+sol := 0;
+rs := 0;
+fn proc(poss, wf) -> {
+	// print("proc ", wf);
+	if wf == "A" {
+		here := poss >> values >> map(len) >> prod;
+		return here;
+
+		// sets := 'xmas' >> map(\c -> poss[c] >> set);
+		// false_overlap := 0;
+		// for other in double {
+		// 	os := 1;
+		// 	inters := dict();
+		// 	for (i, c) in 'xmas' >> enumerate {
+		// 		os *= intersect(sets[i], other[c] >> set) >> len;
+		// 	}
+		// 	false_overlap += os;
+		// }
+
+		// overlap := 0;
+		// for other in sols {
+		// 	os := 1;
+		// 	inters := dict();
+		// 	for (i, c) in 'xmas' >> enumerate() {
+		// 		inter := intersect(sets[i], other[c] >> set);
+		// 		inters[c] = inter;
+		// 		os *= inter >> len;
+		// 	}
+		// 	inters >> push(double);
+		// 	overlap += os;
+		// }
+		// poss >> push(sols);
+		// print("SOLUTION: ", sol+=1, '/568, with here/overlap/false_overlaps: ', here, '/', overlap, '/', false_overlap);
+		
+		// return here - overlap + false_overlap;
+	} else if wf == "R" return 0;
+	// print("IN: ", poss);
+	// print('\n\n\n');
+
+	
+
+	tot := 0;
+	(paths, def) := rdict[wf];
+
+	diffs := [];
+	rets := 0;
+	for (t, op, cmp, to) in paths {
+		match op {
+			'>' -> if poss[t][-1] > cmp {
+				p2 := poss >> clone;
+				p2[t] = p2[t] >> filter(\>> gt(cmp));
+				poss[t] = poss[t] >> filter(\>> leq(cmp));
+				// proc(p2, to) >> push(diffs);
+				rets += proc(p2, to);
+			},
+			'<' -> if poss[t][0] < cmp {
+				p2 := poss >> clone;
+				p2[t] = p2[t] >> filter(\>> lt(cmp));
+				poss[t] = poss[t] >> filter(\>> geq(cmp));
+				// proc(p2, to) >> push(diffs);
+				rets += proc(p2, to);
+			},
+		}
+	}
+	
+	rets += proc(poss, def);
+	// proc(poss, def) >> push(diffs);
+	return rets
+
+	//diffs contain all possible dicts
+	// tdict := dict();
+	// for k in 'xmas' {
+	// 	all := set();
+	// 	for p in diffs for n in p[k] {
+	// 		n >> insert(all);
+	// 	}
+	// 	tdict[k] = all >> keys >> sort;
+	// }
+
+	// // print("Returning ", tdict);
+	// print('\n\n\n\n\n');
+	// tdict
+	
+}
+
+// Every rule split the input range in two for one of the values.
+// So keep track of all values with which we can reach every place? Or start from all endings? and work backwards?
+// 558 rules, on average split in 3 for each path. Average path length of a 
+poss := dict();
+poss['x'] = [1:4001];
+poss['m'] = [1:4001];
+poss['a'] = [1:4001];
+poss['s'] = [1:4001];
+
+print("Done!");
+proc(poss, 'in') >> print;
+// print(sols);
