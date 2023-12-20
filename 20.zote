@@ -1,0 +1,106 @@
+include!("stdlib");
+include!("aoc.zote");
+
+input := read("input") >> trim;
+lines := input >> split("\n");
+
+
+// Module
+// [type (%/&/b), dests]
+// [%, dests, on]
+// [&, dests, {rec: high}]
+// [b, dests]
+
+// Signal
+// [from, to, high]
+
+// Parse
+mods := dict();
+for line in lines {
+	(from, to) := line >> split(" -> ");
+	type := from[0];
+	dests := if in(',', to) to >> split(', ') else [trim(to)];
+	name := if type == 'b' 'broadcast' else from[1:];
+
+	mods[name] = match type {
+		'%' -> [type, dests, false], 
+		'&' -> [type, dests, dict()], 
+		'b' -> [type, dests], 
+	};
+}
+
+// set up &
+for (name, mod) in mods {
+	for dest in mod[1] if in(dest, mods) {
+		dmod := mods[dest];
+		if dmod[0] == '&' {
+			dmod[2][name] = false;
+		}
+	}
+}
+
+// print(mods);
+
+// Push 1000 times, tot_low*tot_high
+tot_low :=0;
+tot_high := 0;
+
+// Require some manual inspection. As usuall I confirmed that they repeated starting at 0. Simple cycles
+insp := ['lf', 'rz', 'br', 'fk'];
+cycles := dict();
+
+fn push_button(pressed) -> {
+	reach := [['button', 'broadcast', false]];
+	while reach {
+		next := [];
+		for (from, to, high) in reach {
+			// print("sent ", high, " from ", from, " to ", to);
+			if high tot_high += 1 else tot_low += 1;
+			if !in(to, mods) continue;
+
+			mod := mods[to];
+			match mod[0] {
+				'%' -> {
+					if !high {
+						mod[2] = !mod[2];
+						for t in mod[1] {
+							[to, t, mod[2]] >> push(next);
+						}
+					}
+				}
+				'&' -> {
+					mod[2][from] = high;
+					send_high := !all(mod[2] >> values, id);
+
+					// Cycle detection for ones coupled to rx
+					if send_high and in(to, insp) and !in(to, cycles) cycles[to] = pressed;
+					
+					for t in mod[1] {
+						[to, t, send_high] >> push(next);
+					}
+				}
+				'b' -> {
+					for t in mod[1] {
+						[to, t, high] >> push(next);
+					}
+				}
+			}
+			
+		}
+		reach = next;
+	}
+}
+
+pressed := 0;
+while len(cycles) < len(insp) or pressed < 1000 {
+	pressed += 1;
+	push_button(pressed); 
+	if pressed == 1000
+		print(tot_high*tot_low);
+} 
+
+fn lcm(values) -> {
+	["LMAO. Enter '", values >> map(str) >> join(' '), "' at https://www.calculatorsoup.com/calculators/math/lcm.php xD"] >> join("")
+}
+
+cycles >> values >> lcm >> print;
