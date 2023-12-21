@@ -1,0 +1,118 @@
+include!("stdlib");
+include!("aoc.zote");
+
+input := read("input") >> trim;
+lines := input >> split("\n");
+
+start := [65, 65];
+// fn ok((row, col)) -> ((abs(row - start[0]) + abs(col - start[1])) % 2) == 1;
+
+// lines[65][65] = '.';
+
+reach := [start];
+vis := set();
+
+rows := len(lines);
+cols := len(lines[0]);
+
+wrap_count := dict();
+for row in [0:rows] for col in [0:cols] wrap_count[[row, col]] = 0;
+
+wrap_increases := dict();
+for row in [0:rows] for col in [0:cols] wrap_increases[[row, col]] = 0;
+
+// Should contain the nonzero [step, increas]
+wrap_steps := dict();
+for row in [0:rows] for col in [0:cols] wrap_steps[[row, col]] = [];
+
+ins := [79, 88];
+pattern := [];
+
+poss := 0;
+
+cycle_len := 2*131;
+fin := 26501365;
+cycle_start := fin % cycle_len;
+
+cycles := fin/cycle_len;
+
+first := 3719;
+derivative := 88268;
+for cycle in [0:cycles] {
+	first += derivative;
+	derivative += 117304;
+	print("Cycle ", cycle, ", val ", first);
+}
+print("Final ", first);
+
+
+// for step in [0:2000] {
+for step in [0:0] {
+	next := [];
+	for (row, col) in reach {
+		pos := [row, col];
+		if pos >> in(vis) continue;
+		if lines[pos[0] % rows][pos[1] % rows] == '#' continue;
+		pos >> insert(vis);
+
+		row_wrap := row % rows;
+		col_wrap := col % cols;
+		pos_wrap := [row_wrap, col_wrap];
+
+		wrap_increases[pos_wrap] += 1;
+		if step % 2 == 1 poss += 1;
+
+		for neigh in neighs4(pos) {
+			neigh >> push(next);
+		}
+	}
+
+	reach = next;
+
+	if (step - cycle_start) % cycle_len == 0 {
+		print(poss);
+	}
+
+	// if step % 2 == 1 {
+	// 	for row in [0:rows] for col in [0:cols] if wrap_increases[[row, col]] != 0 {
+	// 		inc := wrap_increases[[row, col]];
+	// 		wrap_count[[row, col]] += inc;
+	// 		wrap_increases[[row, col]] = 0;
+	// 		[step, inc] >> push(wrap_steps[[row, col]]);
+	// 	};
+	// 	// print("Fin step ", step);
+	// }
+
+	// ans := vis >> keys >> filter(ok) >> len;
+	// ans >> push(pattern);
+	// if step % 10 == 0 {
+	// 	print("After step ", step, ", there are ", ans);
+	// }
+	// if step % 100 == 0 {
+	// 	print("Step ", step);
+	// 	print(wrap_count);
+	// }
+}
+
+// for (pos, incs) in list(wrap_steps)[:6] if (lines[pos[0]][pos[1]] != '#') {
+// 	print("\n\n\nPOSITION:", pos);
+// 	for (step, inc) in incs {
+// 		print(step, " ", inc);
+// 	}
+// }
+
+/// We use the pattern of repetition for single cells
+fn predict(pos, iter) -> {
+
+	
+}
+
+
+print(pattern);
+
+// It the input has a big path between the middle of all edges. This would fastline traffic between different connecting blocks
+// Also, the outside edges are completely open, meaning we can fastline as long as we want in different directions.
+// This must be the key to facilitating these infinite travels. How many cells can we reach in our 26501365 steps? 
+// Must be uneven nbr of steps from start.
+
+// Very curious that the diffs for one random cell are all 0, and then sometimes increase. At the beginning they increase by 1, as you would expect, but then they increase by 2, 3, 4, 5, and so on. Not really regular, but almost.
