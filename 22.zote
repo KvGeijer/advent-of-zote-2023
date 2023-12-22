@@ -4,11 +4,7 @@ include!("aoc.zote");
 input := read("input") >> trim;
 lines := input >> split("\n");
 
-bricks := lines >> map(\>> split("~") >> map(\>> split(",") >> map(int) >> rev)) 
-	// >> sort 
-	>> map(\>> map(\>> rev)) >> enumerate;
-
-bricks := bricks >> map(\(id, (p1, p2)) -> [id, p1, p2]);
+bricks := lines >> map(\>> split("~") >> map(ints)) >> enumerate >> map(\(id, (p1, p2)) -> [id, p1, p2]);
 
 fn between(p1, p2) -> {
 	ps := [p2];
@@ -27,15 +23,12 @@ for (id, p1, p2) in bricks {
 		positions[p] = id;
 }
 
-// return between([1, 0, 1], [1, 6, 1]);
-
 vadd := \(x, y, z), (x2, y2, z2) -> [x + x2, y + y2, z + z2];
 
 fn lower() -> {
 	changed := set();
 	next := dict();
 	bricks_new := [];
-	// print(positions);
 
 	for (id, p1, p2) in bricks {
 		p1n := p1 >> vadd([0,0,-1]);
@@ -52,7 +45,6 @@ fn lower() -> {
 
 		// Did it fall?
 		if ok id >> insert(changed);
-		// print("Change for id ", id, ", ", changed);
 		
 		if ok for p in between(p1n, p2n) {
 			next[p] = id;
@@ -72,25 +64,10 @@ fn lower() -> {
 	[next, bricks_new, changed]
 }
 
-// We need final position, as well as 
-steps :=0;
-while true {
-	(next, bricks_new, change) := lower();
-	if !change break;
-	steps += 1;
-	positions = next;
-	bricks = bricks_new;
-	print("Done with step ", steps);
-}
-
-// print(positions);
-print("starting check");
-
 fn fall_many() ->{
 	t := set();
 	while true {
 		(next, bricks_new, change) := lower();
-		if union(t, change) == t return len(t);
 		t = t >> union(change);
 		if !change return len(t);
 		positions = next;
@@ -98,23 +75,17 @@ fn fall_many() ->{
 	}
 }
 
-tot := 0;
-t2 := 0;
+fall_many();
+
+changed := [];
 p_real := positions >> clone;
 bricks_real := bricks >> clone;
 for (id, p1, p2) in bricks {
-	// print("----- Trying to remove ", id);
 	positions = p_real >> list >> filter(\(_, id1) -> id1 != id) >> dict;
 	bricks = bricks_real >> filter(\(id1, _, _) -> id1 != id);
-	(next, bricks_new, changed) := lower();
-	t2 += fall_many();
-	// if changed print("Falling ", changed, " when dis ", id);
-	print(id);
-	// t2 += changed;
-	// if !changed {
-		// print("Ok ", id);
-		// tot += 1;
-	// }
+	change := fall_many();
+	change >> push(changed);
 }
-print("Done");
-print(t2);
+
+changed >> filter(\>> gt(0)) >> len >> print;
+changed >> sum >> print;
