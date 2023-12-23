@@ -1,0 +1,62 @@
+include!("stdlib");
+include!("aoc.zote");
+
+input := read("input") >> trim;
+lines := input >> split("\n");
+
+start := [0, 1];
+
+reach := [[start, set()]];
+vis := set();
+
+rows := len(lines);
+cols := len(lines[0]);
+
+fn ok((row, col)) -> row >= 0 and row < rows and col >= 0 and col < cols and lines[row][col] != '#'; 
+
+longest := dict();
+
+
+best := 0;
+step := -1;
+while reach {
+	print("starting ", step);
+	step += 1;
+	next := [];
+	for (pos, vis) in reach {
+		// print("Looking at ", pos);
+		if !ok(pos) continue;
+		pos >> insert(vis);
+
+		// print("Looking at ", pos);
+
+		if pos[0] == rows - 1 best = max(best, step);
+
+		match lines[pos[0]][pos[1]] {
+			'.' -> for neigh in neighs4(pos) if ok(neigh) and !in(neigh, vis) {
+				[neigh, clone(vis)] >> push(next)				
+			},
+			'#' -> {},
+			'>' -> {
+				n := pos >> vadd([0, 1]);
+				if !in(n, vis) [n, clone(vis)] >> push(next);
+			},
+			'<' -> {
+				n := pos >> vadd([0, -1]);
+				if !in(n, vis) [n, clone(vis)] >> push(next);
+			},
+			'v' -> {
+				n := pos >> vadd([1, 0]);
+				if !in(n, vis) [n, clone(vis)] >> push(next);
+			},
+			'^' -> {
+				n := pos >> vadd([-1, 0]);
+				if !in(n, vis) [n, clone(vis)] >> push(next);
+			},
+		}  
+	}
+	reach = next;
+}
+
+print("Done");
+print(best);
