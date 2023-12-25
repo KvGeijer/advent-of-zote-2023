@@ -1,0 +1,57 @@
+include!("stdlib");
+include!("aoc.zote");
+
+input := read("input") >> trim;
+lines := input >> split("\n");
+
+conns := dict();
+e := 0;
+
+for line in lines {
+	(from, to) := line >> split(": ");
+	if !in(from, conns) conns[from] = [];
+	
+	for to in to >> split(" ") {
+		if !in(to, conns) conns[to] = [];
+		from >> push(conns[to]);
+		to >> push(conns[from]);
+		e += 1;
+	}
+}
+
+// Use this to print a csv of all edges.
+// Then you can use https://cosmograph.app/run/ to visually find the two clusters
+// for (from, tos) in conns {
+// 	for to in tos {
+// 		print(from, ",", to);
+// 		print(to, ",", from);
+// 	}
+// }
+
+// Here are the three connections I found, so just remove them
+
+// jks -> rfg
+conns["jks"] = conns["jks"] >> filter(\>> neq("rfg"));
+conns["rfg"] = conns["rfg"] >> filter(\>> neq("jks"));
+
+// zjm -> zcp
+conns["zjm"] = conns["zjm"] >> filter(\>> neq("zcp"));
+conns["zcp"] = conns["zcp"] >> filter(\>> neq("zjm"));
+
+// nsk -> rsg
+conns["nsk"] = conns["nsk"] >> filter(\>> neq("rsg"));
+conns["rsg"] = conns["rsg"] >> filter(\>> neq("nsk"));
+
+fn dfs(node, vis) -> {
+	if node >> in(vis) return 0;
+	node >> insert(vis);
+
+	t := 1;
+	for to in conns[node] {
+		t += dfs(to, vis);
+	}
+	t
+}
+
+dfs("bmp", set()) * dfs("ggd", set()) >> print;
+
