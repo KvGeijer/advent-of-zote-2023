@@ -1,8 +1,10 @@
 repos:
-    - repo: https://github.com/LiquidFun/aoc_tiles
+    # - repo: https://github.com/LiquidFun/aoc_tiles
+    - repo: local
       rev: 0.5.5
       hooks:
           - id: aoc-tiles
+            entry: /home/kare/dev/aoc_tiles/aoc_tiles/cli.py				
             # Optionally use these arguments. Auto add tiles to git adds the tiles to git,
             # possibly amends your commit by creating the tile images and updating the README.
             # Language sorting shows the preference of the order of the languages to use.
@@ -10,7 +12,7 @@ repos:
             # the tiles. See the customization section in the README for more flags.
             # Simply remove the comments (#) below for args and the flags you want.
             args:
-                - --overwrite-year='2023'
+                - --overwrite-year=2023
                 # - --auto-add-tiles-to-git=amend
                 # - --language-sorting=jl,kt,py,rs
             #     - --exclude-patterns="2021/*/*.apl,2021/*/*.py,2021/*/*.cpp"
