@@ -1,3 +1,4 @@
 .aoc_tiles/*
 !.aoc_tiles/tiles/
 input
+session.cookie
