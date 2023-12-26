@@ -1,7 +1,7 @@
 repos:
     # - repo: https://github.com/LiquidFun/aoc_tiles
     - repo: local
-      rev: 0.5.5
+      # rev: 0.5.5
       hooks:
           - id: aoc-tiles
             entry: /home/kare/dev/aoc_tiles/aoc_tiles/cli.py				
