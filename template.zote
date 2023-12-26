@@ -1,0 +1,7 @@
+include!("stdlib");
+include!("aoc.zote");
+
+input := read("input") >> trim;
+lines := input >> split("\n");
+
+
